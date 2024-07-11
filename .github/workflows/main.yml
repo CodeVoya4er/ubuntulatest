@@ -26,7 +26,7 @@ jobs:
     - name: Download Wallpaper
       run: |
         $url = "https://images8.alphacoders.com/134/1349793.png"
-        $tempFile = "$env:TEMP\wallpaper.png"
+        $tempFile = "$env:TEMP\\wallpaper.png"  # Perbaikan: menggunakan double backslash
         Invoke-WebRequest -Uri $url -OutFile $tempFile
     - name: Set Wallpaper
       run: |
@@ -41,6 +41,6 @@ jobs:
                 }
             }
 "@
-        [Wallpaper]::SetWallpaper("$env:TEMP\wallpaper.png")
+        [Wallpaper]::SetWallpaper("$env:TEMP\\wallpaper.png")  # Perbaikan: menggunakan double backslash
     - name: Create ngrok tunnel
       run: .\ngrok.exe tcp 3389
