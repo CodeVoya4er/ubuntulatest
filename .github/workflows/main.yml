@@ -1,0 +1,46 @@
+name: RDP Windows 11
+
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Set up ngrok
+      run: Invoke-WebRequest https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -OutFile ngrok.zip
+    - name: Extract ngrok
+      run: Expand-Archive ngrok.zip -DestinationPath .
+    - name: Authenticate ngrok
+      run: .\ngrok.exe authtoken $Env:NGROK_AUTH_TOKEN
+      env:
+        NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
+    - name: Enable RDP
+      run: Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+    - name: Allow RDP in Firewall
+      run: netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
+    - name: Set Password
+      run: net user /add runneradmin P@ssw0rd!
+    - name: Add User to Administrators Group
+      run: net localgroup administrators runneradmin /add
+    - name: Download Wallpaper
+      run: |
+        $url = "https://images8.alphacoders.com/134/1349793.png"
+        $tempFile = "$env:TEMP\wallpaper.png"
+        Invoke-WebRequest -Uri $url -OutFile $tempFile
+    - name: Set Wallpaper
+      run: |
+        Add-Type -TypeDefinition @"
+            using System;
+            using System.Runtime.InteropServices;
+            public class Wallpaper {
+                [DllImport("user32.dll", CharSet = CharSet.Auto)]
+                public static extern int SystemParametersInfo(int uAction, int uParam, string lpvParam, int fuWinIni);
+                public static void SetWallpaper(string path) {
+                    SystemParametersInfo(20, 0, path, 0x01 | 0x02);
+                }
+            }
+"@
+        [Wallpaper]::SetWallpaper("$env:TEMP\wallpaper.png")
+    - name: Create ngrok tunnel
+      run: .\ngrok.exe tcp 3389
