@@ -8,17 +8,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download ngrok
-      run: wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip -O ngrok.zip
-    - name: Extract ngrok
+    - name: Download
+      run: wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
+    - name: Extract
       run: unzip ngrok.zip
-    - name: Authenticate ngrok
+    - name: Auth
       run: ./ngrok authtoken $NGROK_AUTH_TOKEN
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-    - name: Enable SSH (optional, if needed)
-      run: sudo systemctl start ssh
-    - name: Set SSH Password (optional, if needed)
+    - name: Install SSH
+      run: sudo apt-get install -y openssh-server
+    - name: Start SSH Service
+      run: sudo service ssh start
+    - name: Set Password for runner user
       run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
-    - name: Create SSH Tunnel with ngrok
+    - name: Create Tunnel
       run: ./ngrok tcp 22
