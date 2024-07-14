@@ -8,19 +8,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download
+    - name: Download ngrok
       run: wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
-    - name: Extract
+    - name: Extract ngrok
       run: unzip ngrok.zip
-    - name: Auth
+    - name: Authenticate ngrok
       run: ./ngrok authtoken $NGROK_AUTH_TOKEN
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-    - name: Install SSH
-      run: sudo apt-get install -y openssh-server
+    - name: Install tmux and SSH server
+      run: sudo apt-get update && sudo apt-get install -y tmux openssh-server
     - name: Start SSH Service
       run: sudo service ssh start
     - name: Set Password for runner user
       run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
-    - name: Create Tunnel
-      run: ./ngrok tcp 22
+    - name: Create tmux session and start ngrok
+      run: tmux new-session -d -s mysession './ngrok tcp 22'
+    - name: Keep Alive
+      run: |
+        while true; do
+          echo "CI job is running..."
+          sleep 300
+        done
