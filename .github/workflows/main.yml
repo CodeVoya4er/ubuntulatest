@@ -15,12 +15,14 @@ jobs:
     - name: Install dependencies
       run: sudo apt-get update && sudo apt-get install -y openssh-server wget unzip
     - name: Auth ngrok
-      run: ngrok/ngrok authtoken $NGROK_AUTH_TOKEN  # Menggunakan path ngrok yang sesuai setelah ekstraksi
+      run: ./ngrok/ngrok authtoken $NGROK_AUTH_TOKEN  # Menggunakan path ngrok yang sesuai setelah ekstraksi
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
     - name: Enable SSH
       run: sudo systemctl enable ssh && sudo systemctl start ssh
     - name: Set user password
-      run: echo 'user:root' | sudo chpasswd
+      run: |
+        sudo useradd -m user  # Buat user baru
+        echo 'user:root' | sudo chpasswd  # Atur password user
     - name: Create tunnel
-      run: ngrok/ngrok tcp 22  # Mengarahkan port 22 (SSH) melalui ngrok
+      run: ./ngrok/ngrok tcp 22  # Mengarahkan port 22 (SSH) melalui ngrok
