@@ -5,24 +5,24 @@ on: [push, workflow_dispatch]
 jobs:
   build:
 
-    runs-on: ubuntu-latest  # Menggunakan Ubuntu sebagai base image
+    runs-on: ubuntu-latest
 
     steps:
     - name: Download ngrok
       run: wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-stable-linux-amd64.zip -O ngrok.zip
     - name: Extract ngrok
-      run: unzip ngrok.zip -d ngrok  # Mengextract ke direktori ngrok/
-    - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y openssh-server wget unzip
-    - name: Auth ngrok
-      run: ./ngrok/ngrok authtoken $NGROK_AUTH_TOKEN  # Menggunakan path ngrok yang sesuai setelah ekstraksi
+      run: unzip ngrok.zip
+    - name: Auth
+      run: ./ngrok/ngrok authtoken $NGROK_AUTH_TOKEN
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
-    - name: Enable SSH
-      run: sudo systemctl enable ssh && sudo systemctl start ssh
-    - name: Set user password
-      run: |
-        sudo useradd -m user  # Buat user baru
-        echo 'user:root' | sudo chpasswd  # Atur password user
-    - name: Create tunnel
-      run: ./ngrok/ngrok tcp 22  # Mengarahkan port 22 (SSH) melalui ngrok
+    - name: Enable TS
+      run: sudo sysctl -w net.ipv4.tcp_keepalive_time=1800
+    - name: Enable RDP
+      run: sudo ufw allow 3389/tcp
+    - name: Set User Authentication
+      run: sudo sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config && sudo service ssh restart
+    - name: Set Local User Password
+      run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
+    - name: Create Tunnel
+      run: ./ngrok/ngrok tcp 3389
