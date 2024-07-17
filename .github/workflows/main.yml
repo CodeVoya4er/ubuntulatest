@@ -22,8 +22,10 @@ jobs:
       run: sudo service ssh start
     - name: Set Password for runner user
       run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
-    - name: Create tmux session and start ngrok
-      run: tmux new-session -d -s mysession './ngrok tcp 22'
+    - name: Create tmux session and start ngrok for port 22
+      run: tmux new-session -d -s mysession1 './ngrok tcp 22'
+    - name: Create tmux session and start ngrok for port 3389
+      run: tmux new-session -d -s mysession2 './ngrok tcp 3389'
     - name: Keep Alive
       run: |
         while true; do
