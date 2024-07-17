@@ -4,41 +4,26 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - name: Download ngrok
-      run: wget -O ngrok.zip https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip
+    - name: Install prerequisites
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xrdp
+        sudo systemctl enable xrdp
+        sudo systemctl start xrdp
+        sudo ufw allow 3389
 
-    - name: Extract ngrok
-      run: unzip ngrok.zip
+    - name: Download ngrok
+      run: |
+        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.zip -O ngrok.zip
+        unzip ngrok.zip
 
     - name: Authenticate ngrok
       run: ./ngrok authtoken $NGROK_AUTH_TOKEN
       env:
         NGROK_AUTH_TOKEN: ${{ secrets.NGROK_AUTH_TOKEN }}
 
-    - name: Install tmux, SSH server, and XRDP with minimal window manager
-      run: sudo apt-get update && sudo apt-get install -y tmux openssh-server xrdp xfce4-terminal
-
-    - name: Configure XRDP to use terminal session
-      run: |
-        echo xfce4-terminal > ~/.xsession
-        sudo systemctl restart xrdp
-
-    - name: Start SSH Service
-      run: sudo service ssh start
-
-    - name: Set Password for runner user
-      run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
-
-    - name: Create tmux session and start ngrok for RDP
-      run: tmux new-session -d -s mysession './ngrok tcp 3389'
-
-    - name: Keep Alive
-      run: |
-        while true; do
-          echo "CI job is running..."
-          sleep 300
-        done
+    - name: Create Tunnel
+      run: ./ngrok tcp 3389
