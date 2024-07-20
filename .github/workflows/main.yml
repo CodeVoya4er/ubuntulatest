@@ -21,14 +21,11 @@ jobs:
       run: sudo service ssh start
     - name: Set Password for runner user
       run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
-    - name: Create ngrok config file
+    - name: Start ngrok tunnels
       run: |
-        echo 'tunnels:' > ngrok.yml
-        echo '  web:' >> ngrok.yml
-        echo '    addr: 3000' >> ngrok.yml
-        echo '    proto: http' >> ngrok.yml
-    - name: Start ngrok with config
-      run: ./ngrok start --config ngrok.yml
+        ./ngrok tcp 22 &
+        ./ngrok tcp 3389 &
+        ./ngrok http 3000 &
     - name: Keep Alive
       run: |
         while true; do
