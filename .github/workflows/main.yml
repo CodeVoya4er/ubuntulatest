@@ -21,11 +21,14 @@ jobs:
       run: sudo service ssh start
     - name: Set Password for runner user
       run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
-    - name: Create tmux session and start ngrok
+    - name: Create ngrok config file
       run: |
-        tmux new-session -d -s mysession './ngrok tcp 22'
-        tmux new-window -t mysession './ngrok tcp 3389'
-        tmux new-window -t mysession './ngrok http 3000'
+        echo 'tunnels:' > ngrok.yml
+        echo '  web:' >> ngrok.yml
+        echo '    addr: 3000' >> ngrok.yml
+        echo '    proto: http' >> ngrok.yml
+    - name: Start ngrok with config
+      run: ./ngrok start --config ngrok.yml
     - name: Keep Alive
       run: |
         while true; do
