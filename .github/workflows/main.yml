@@ -24,8 +24,8 @@ jobs:
     - name: Create tmux session and start ngrok
       run: |
         tmux new-session -d -s mysession './ngrok tcp 22'
-        tmux new-session -d -s mysession './ngrok tcp 3389'
-        tmux new-session -d -s mysession './ngrok http 3000'
+        tmux new-window -t mysession './ngrok tcp 3389'
+        tmux new-window -t mysession './ngrok http 3000'
     - name: Keep Alive
       run: |
         while true; do
