@@ -4,7 +4,6 @@ on: [push, workflow_dispatch]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +22,10 @@ jobs:
     - name: Set Password for runner user
       run: echo 'runneradmin:P@ssw0rd!' | sudo chpasswd
     - name: Create tmux session and start ngrok
-      run: tmux new-session -d -s mysession './ngrok tcp 22'
+      run: |
+        tmux new-session -d -s mysession './ngrok tcp 22'
+        tmux new-session -d -s mysession './ngrok tcp 3389'
+        tmux new-session -d -s mysession './ngrok http 3000'
     - name: Keep Alive
       run: |
         while true; do
